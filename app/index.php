@@ -1,4 +1,5 @@
 <?php
+
 try {
     require 'bootstrap.php';
     $db = \Api\Models\DbConnection::db();

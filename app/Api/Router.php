@@ -33,18 +33,21 @@ class Router
      */
     public function render(): bool|string
     {
+        return $this->render_json([
+            'controller' => $this->action,
+            'header' => $this->resolve_header(200)
+        ], 200);
         switch ($this->method) {
             case 'GET':
-                if($this->id) {
-                    return $this->render_json($this->controller->list(), 200);
-                }
-                return $this->render_json($this->controller->list(), 200);
+
+
+                // return $this->render_json($this->controller->get(), 200);
                 break;
             case 'POST':
                 return $this->render_json($this->controller->create(), 201);
             case 'DELETE':
             case 'PUT':
-                if(!$this->id) {
+                if (!$this->id) {
                     throw new ControllerException('You cannot modify or delete without id parameter.');
                 }
                 break;
@@ -64,6 +67,7 @@ class Router
         header("Access-Control-Max-Age: 3600");
         header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers");
         header($this->resolve_header($code));
+        // echo $this->resolve_header($code);
 
         return json_encode($response);
     }
@@ -74,7 +78,7 @@ class Router
     private function resolve_header(int $code): string
     {
         $base = 'HTTP/1.1 ';
-        $code = match ($code) {
+        $code_string = match ($code) {
             200 => 'OK',
             201 => 'Created',
             202 => 'Accepted',
@@ -85,7 +89,7 @@ class Router
             default => throw new ControllerException('The status code is not implemented.')
         };
 
-        return $base . $code . ' ' . $code;
+        return $base . $code . ' ' . $code_string;
     }
 
     /**
