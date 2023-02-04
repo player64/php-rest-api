@@ -3,13 +3,19 @@
 namespace Api\Controllers;
 
 use Api\Models\FilmModel;
-use Api\Models\Model;
 
 class FilmController extends Controller
 {
 
-    public function __construct()
+    function __construct(\PDO $db)
     {
-        $this->model = new FilmModel();
+        $this->model = new FilmModel($db);
+    }
+
+    public function list(): array
+    {
+        return [
+            'somethinf' => 'true'
+        ];
     }
 }

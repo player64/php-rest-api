@@ -2,12 +2,19 @@
 
 namespace Api;
 
+use Api\Controllers\Controller;
 use Api\Controllers\ControllerException;
+use Api\Controllers\FilmController;
 
 class Router
 {
     private \PDO $db;
-    private string $controller;
+    private string $action;
+
+    private string $method;
+
+    private Controller $controller;
+
     private int|null $id;
 
     /**
@@ -16,30 +23,9 @@ class Router
     function __construct(\PDO $db)
     {
         $this->db = $db;
-        $this->assign_controller_and_method();
-    }
-
-    /**
-     * @throws ControllerException
-     */
-    private function assign_controller_and_method(): void
-    {
-        if (isset($_GET['controller']) && $_GET['controller']) {
-            $this->controller = $_GET['controller'];
-            $this->id = (isset($_GET['id'])) ? (int)$_GET['id'] : null;
-        } else if ($_SERVER['REQUEST_URI'] !== '/' && $_SERVER['REQUEST_URI'] !== '') {
-            $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-            $uri = explode('/', $uri);
-            $this->controller = $uri[1];
-            $this->id = (isset($uri[2])) ? (int)$uri[2] : null;
-        }
-
-        // if controller is set and not empty finish here otherwise let to throw exception
-        if (isset($this->controller) && $this->controller !== '') {
-            return;
-        }
-
-        throw new ControllerException('Controller is not set.');
+        $this->method = $_SERVER['REQUEST_METHOD'];
+        $this->_obtain_action_and_id_from_url();
+        $this->_obtain_controller();
     }
 
     /**
@@ -47,13 +33,24 @@ class Router
      */
     public function render(): bool|string
     {
+        switch ($this->method) {
+            case 'GET':
+                if($this->id) {
+                    return $this->render_json($this->controller->list(), 200);
+                }
+                return $this->render_json($this->controller->list(), 200);
+                break;
+            case 'POST':
+                return $this->render_json($this->controller->create(), 201);
+            case 'DELETE':
+            case 'PUT':
+                if(!$this->id) {
+                    throw new ControllerException('You cannot modify or delete without id parameter.');
+                }
+                break;
+        }
 
-        return $this->render_json(
-            [
-                'controller' => $this->controller,
-                'id' => $this->id
-            ], 200
-        );
+        return false;
     }
 
     /**
@@ -88,6 +85,40 @@ class Router
             default => throw new ControllerException('The status code is not implemented.')
         };
 
-        return $base . $code . ' '. $code;
+        return $base . $code . ' ' . $code;
+    }
+
+    /**
+     * @throws ControllerException
+     */
+    private function _obtain_action_and_id_from_url(): void
+    {
+        if (isset($_GET['controller']) && $_GET['controller']) {
+            $this->action = strtolower($_GET['controller']);
+            $this->id = (isset($_GET['id'])) ? (int)$_GET['id'] : null;
+        } else if ($_SERVER['REQUEST_URI'] !== '/' && $_SERVER['REQUEST_URI'] !== '') {
+            $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+            $uri = explode('/', $uri);
+            $this->action = strtolower($uri[1]);
+            $this->id = (isset($uri[2])) ? (int)$uri[2] : null;
+        }
+
+        // if controller is set and not empty finish here otherwise let to throw exception
+        if (isset($this->action) && $this->action !== '') {
+            return;
+        }
+
+        throw new ControllerException('Controller is not set.');
+    }
+
+    /**
+     * @throws ControllerException
+     */
+    private function _obtain_controller(): void
+    {
+        $this->controller = match ($this->action) {
+            'films' => new FilmController($this->db),
+            default => throw new ControllerException('The controller ' . $this->action . ' is not implemented.'),
+        };
     }
 }
