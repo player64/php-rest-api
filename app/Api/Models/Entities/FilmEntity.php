@@ -12,23 +12,20 @@ class FilmEntity extends Entity
     /**
      * @throws EntityException
      */
-    function __construct(
-        string     $title,
-        int        $year,
-        int|string $genre,
-        int        $id = null,
-    )
+    function __construct(array $params)
     {
-        $this->id = $id;
-        $this->set_title($title);
-        $this->set_year($year);
-        $this->set_genre($genre);
+        if(isset($params['id'])) {
+            $this->id = $params['id'];
+        }
+        $this->set_title($params['title']);
+        $this->set_year($params['year']);
+        $this->set_genre($params['genre']);
     }
 
     /**
      * @throws EntityException
      */
-    public function set_title(string $title)
+    public function set_title(string $title): void
     {
         Validator::required_string($title);
         $this->title = $title;
@@ -37,7 +34,7 @@ class FilmEntity extends Entity
     /**
      * @throws EntityException
      */
-    public function set_year(int $year)
+    public function set_year(int $year): void
     {
         Validator::year($year);
 
@@ -47,7 +44,7 @@ class FilmEntity extends Entity
     /**
      * @throws EntityException
      */
-    public function set_genre(int | string $genre)
+    public function set_genre(int | string $genre): void
     {
         if(gettype($genre) === 'integer') {
             $this->genre = $genre;
@@ -59,11 +56,17 @@ class FilmEntity extends Entity
 
     public function get(): array
     {
-        return [
-            'id' =>  $this->id,
+        $out = [
             'title' => $this->title,
             'year' => $this->year,
             'genre' => $this->genre
         ];
+
+        if(isset($this->id)) {
+            $out['id'] = $this->id;
+        }
+
+
+        return $out;
     }
 }

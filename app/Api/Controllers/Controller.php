@@ -3,8 +3,10 @@
 namespace Api\Controllers;
 
 use Api\Models\Entities\Entity;
+use Api\Models\Entities\EntityException;
 use Api\Models\FilmModel;
 use Api\Models\Model;
+use Api\Models\ModelException;
 
 abstract class Controller
 {
@@ -13,22 +15,36 @@ abstract class Controller
     abstract function __construct(\PDO $db);
 
 
+    abstract public function create(): ControllerResponse;
+
     public function list(): array {
         return [];
-        // return $this->model->list();
     }
 
     public function get(int $id): array
     {
         return [];
-        // return $this->model->get($id);
     }
 
-    public function create(): array {
-        return [];
+    /**
+     * @throws ControllerException
+     */
+    protected function get_entity_from_request(array $request, string $entity): Entity
+    {
+        foreach ($this->model->columns as $key) {
+            if(!isset($request[$key])) {
+                throw new ControllerException('Wrong parameters given. '.strtoupper($key). ' is required');
+            }
+        }
+
+        try {
+            return new $entity($request);
+        } catch (EntityException|\TypeError $e) {
+            throw new ControllerException($e->getMessage());
+        }
     }
 
-    public function parse_json_request(): array
+    protected function parse_json_request(): array
     {
         return (array) json_decode(file_get_contents('php://input'), true);
     }

@@ -8,12 +8,30 @@ abstract class Model
 {
     protected string $table;
 
+    public array $columns;
+
     protected \PDO $db;
-    protected Entity $entity;
 
     function __construct(\PDO $db) {
         $this->db = $db;
     }
+
+    abstract public function create(Entity $entity);
+
+
+
+
+    /**
+     * @throws ModelException
+     */
+    protected function validate_params(array $request): void {
+        foreach ($this->columns as $key) {
+            if(!isset($request[$key])) {
+                throw new ModelException('Wrong parameters given. '.strtoupper($key). ' is required');
+            }
+        }
+    }
+
 
 /*    abstract public function list();
 

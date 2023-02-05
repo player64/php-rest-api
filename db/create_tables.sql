@@ -1,0 +1,29 @@
+CREATE TABLE IF NOT EXISTS genres (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL
+) ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS actors
+(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    surname VARCHAR(50) NOT NULL,
+    gender VARCHAR(6) NOT NULL CHECK (gender IN ('male', 'female'))
+) ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS films (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(50) NOT NULL,
+    year INT NOT NULL CHECK (year >= 1900),
+    genre BIGINT UNSIGNED,
+    FOREIGN KEY (genre) REFERENCES genres(id) ON DELETE SET NULL
+) ENGINE=INNODB;
+
+CREATE TABLE  IF NOT EXISTS film_actor
+(
+    film_id  BIGINT UNSIGNED NOT NULL,
+    actor_id BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (film_id, actor_id),
+    FOREIGN KEY (film_id) REFERENCES films (id),
+    FOREIGN KEY (actor_id) REFERENCES actors (id)
+) ENGINE=INNODB;
