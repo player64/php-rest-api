@@ -2,9 +2,12 @@
 
 namespace Api;
 
+use Api\Controllers\ActorController;
 use Api\Controllers\Controller;
 use Api\Controllers\ControllerException;
+use Api\Controllers\ControllerResponse;
 use Api\Controllers\FilmController;
+use Api\Controllers\GenreController;
 
 class Router
 {
@@ -33,24 +36,30 @@ class Router
      */
     public function render(): bool|string
     {
+        $response = false;
         switch ($this->method) {
             case 'GET':
-                if($this->id) {
-                    return $this->render_json($this->controller->get($this->id), 200);
+                if ($this->id) {
+                    $response = $this->controller->get($this->id);
+                } else {
+                    $response = $this->controller->list();
                 }
-                return $this->render_json($this->controller->list(), 200);
                 break;
             case 'POST':
-
                 $response = $this->controller->create();
-
-                return $this->render_json($response->data, $response->status);
+                break;
             case 'DELETE':
             case 'PUT':
                 if (!$this->id) {
-                    throw new ControllerException('You cannot modify or delete without id parameter.');
+                    throw new ControllerException('You cannot modify or delete a record without an id parameter.');
                 }
+                $action = ($this->method === 'PUT') ? 'update' : 'delete';
+                $response = $this->controller->$action($this->id);
                 break;
+        }
+
+        if ($response instanceof ControllerResponse) {
+            return $this->render_json($response->data, $response->status);
         }
 
         return false;
@@ -120,6 +129,8 @@ class Router
     {
         $this->controller = match ($this->action) {
             'films' => new FilmController($this->db),
+            'genres' => new GenreController($this->db),
+            'actors' => new ActorController($this->db),
             default => throw new ControllerException('The controller ' . $this->action . ' is not implemented.'),
         };
     }

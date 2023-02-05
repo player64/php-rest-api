@@ -12,5 +12,7 @@
             "name": "Mariusz Januszkiewicz"
         }
     ],
-    "require": {}
+    "require": {
+      "ext-pdo": "*"
+    }
 }

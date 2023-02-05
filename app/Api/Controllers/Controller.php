@@ -2,11 +2,9 @@
 
 namespace Api\Controllers;
 
-use Api\Models\Entities\Entity;
-use Api\Models\Entities\EntityException;
-use Api\Models\FilmModel;
 use Api\Models\Model;
 use Api\Models\ModelException;
+use Api\Models\RecordNotFoundException;
 
 abstract class Controller
 {
@@ -14,42 +12,91 @@ abstract class Controller
 
     abstract function __construct(\PDO $db);
 
-
-    abstract public function create(): ControllerResponse;
-
-    public function list(): array {
-        return [];
-    }
-
-    public function get(int $id): array
+    public function list(): ControllerResponse
     {
-        return [];
-    }
+        try {
+            $data = $this->model->list();
+            return new ControllerResponse($data, 200);
 
-    /**
-     * @throws ControllerException
-     */
-    protected function get_entity_from_request(array $request, string $entity): Entity
-    {
-        foreach ($this->model->columns as $key) {
-            if(!isset($request[$key])) {
-                throw new ControllerException('Wrong parameters given. '.strtoupper($key). ' is required');
-            }
+        } catch (ModelException $e) {
+            return new ControllerResponse([
+                'error' => $e->getMessage(),
+            ], 400);
         }
+    }
+
+    public function get(int $id): ControllerResponse
+    {
+        try {
+            $data = $this->model->get($id);
+            return new ControllerResponse( $data, 200);
+        } catch (RecordNotFoundException $e) {
+            return new ControllerResponse([
+                'msg' => $e->getMessage(),
+            ], 404);
+        }
+    }
+
+    public function delete(int $id): ControllerResponse
+    {
+        try {
+            $this->model->delete($id);
+            return new ControllerResponse([
+                'message' => 'Successfully deleted',
+            ], 202);
+        } catch (ModelException $e) {
+            return new ControllerResponse([
+                'error' => $e->getMessage(),
+            ], 400);
+        } catch (RecordNotFoundException $e) {
+            return new ControllerResponse([
+                'msg' => $e->getMessage(),
+            ], 404);
+        }
+    }
+
+    public function update(int $id): ControllerResponse
+    {
+        $request = $this->parse_json_request();
+        try {
+            $data = $this->model->update($id, $request);
+            return new ControllerResponse([
+                'message' => 'Successfully updated',
+                'data' => $data
+            ], 202);
+
+        } catch (ModelException $e) {
+            return new ControllerResponse([
+                'error' => $e->getMessage(),
+            ], 400);
+        } catch (RecordNotFoundException $e) {
+            return new ControllerResponse([
+                'msg' => $e->getMessage(),
+            ], 404);
+        }
+    }
+
+    public function create(): ControllerResponse
+    {
+        $request = $this->parse_json_request();
 
         try {
-            return new $entity($request);
-        } catch (EntityException|\TypeError $e) {
-            throw new ControllerException($e->getMessage());
+            $data = $this->model->create($request);
+
+            return new ControllerResponse([
+                'message' => 'Successfully created',
+                'data' => $data
+            ], 202);
+
+        } catch (ModelException $e) {
+            return new ControllerResponse([
+                'error' => $e->getMessage(),
+            ], 400);
         }
     }
 
     protected function parse_json_request(): array
     {
-        return (array) json_decode(file_get_contents('php://input'), true);
+        return (array)json_decode(file_get_contents('php://input'), true);
     }
-
-/*    abstract public function modify(Entity $entity);
-
-    abstract public function delete(int $id);*/
 }

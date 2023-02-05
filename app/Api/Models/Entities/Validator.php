@@ -39,4 +39,17 @@ class Validator
             throw new EntityException('Wrong date. The release year cannot be in the future.');
         }
     }
+
+    /**
+     * @throws EntityException
+     */
+    public static function is_valid_gender(string $value): void
+    {
+        self::required(trim($value));
+
+        if($value === 'male' || $value === 'female') {
+           return;
+        }
+        throw new EntityException('The gender value can be male or female.');
+    }
 }

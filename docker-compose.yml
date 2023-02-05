@@ -15,6 +15,8 @@ services:
       DB_PASSWORD: $DB_PASSWORD
     volumes:
       - ./app:/var/www/html
+    command:
+      "php -S 0.0.0.0:8080 -t /var/www/html/"
     depends_on:
       - db
     networks:
@@ -33,6 +35,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
+      - "./db/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql"
       - db_data:/var/lib/mysql
     networks:
       - backend

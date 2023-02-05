@@ -4,7 +4,6 @@ namespace Api\Models\Entities;
 
 class FilmEntity extends Entity
 {
-    private int|null $id;
     private string $title;
     private int $year;
     private int|string $genre;
@@ -14,9 +13,6 @@ class FilmEntity extends Entity
      */
     function __construct(array $params)
     {
-        if(isset($params['id'])) {
-            $this->id = $params['id'];
-        }
         $this->set_title($params['title']);
         $this->set_year($params['year']);
         $this->set_genre($params['genre']);
@@ -28,7 +24,7 @@ class FilmEntity extends Entity
     public function set_title(string $title): void
     {
         Validator::required_string($title);
-        $this->title = $title;
+        $this->title = trim($title);
     }
 
     /**
@@ -56,17 +52,10 @@ class FilmEntity extends Entity
 
     public function get(): array
     {
-        $out = [
+        return [
             'title' => $this->title,
             'year' => $this->year,
             'genre' => $this->genre
         ];
-
-        if(isset($this->id)) {
-            $out['id'] = $this->id;
-        }
-
-
-        return $out;
     }
 }

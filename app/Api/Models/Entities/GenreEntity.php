@@ -4,14 +4,29 @@ namespace Api\Models\Entities;
 
 class GenreEntity extends Entity
 {
+    private string $name;
 
-    public function __construct(array $params)
+    /**
+     * @throws EntityException
+     */
+    function __construct(array $params)
     {
+        $this->set_name($params['name']);
+    }
 
+    /**
+     * @throws EntityException
+     */
+    public function set_name(string $name): void
+    {
+        Validator::required_string($name);
+        $this->name = trim($name);
     }
 
     public function get(): array
     {
-        return [];
+        return [
+            'name' => $this->name,
+        ];
     }
 }
