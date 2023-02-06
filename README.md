@@ -184,7 +184,6 @@ Success response:
 ]
 ```
 
----
 ### Edit an entry
 Method: **PUT** \
 Header: **Content-Type: application/json** \
