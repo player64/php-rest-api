@@ -23,14 +23,14 @@ if(!file_exists(__DIR__.'/vendor/autoload.php')) {
         'Models/GenreModel.php',
         'Router.php'
     ];
-
+    $path =  __DIR__.'/Api/';
     foreach ($files_to_include as $file) {
-        $path =  __DIR__.'/Api/'.$file;
+       $file_path = $path.$file;
 
-        if(file_exists($path)) {
-            require $path;
+        if(file_exists($file_path)) {
+            require $file_path;
         } else {
-            throw new RuntimeException('The file ' . $file . ' Cannot been found. Checked the path ' . $path);
+            throw new RuntimeException('The file ' . basename($file) . ' Cannot been found in given path: ' . $file_path);
         }
     }
 } else {
