@@ -78,7 +78,7 @@ The application utilises three controllers:
 
 
 -------
-## Add a new entry
+### Add a new entry
 
 Method: **POST** \
 Header: **Content-Type: application/json** \
