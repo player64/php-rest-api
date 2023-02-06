@@ -19,11 +19,3 @@ CREATE TABLE IF NOT EXISTS films (
     FOREIGN KEY (genre) REFERENCES genres(id) ON DELETE SET NULL
 ) ENGINE=INNODB;
 
-CREATE TABLE  IF NOT EXISTS film_actor
-(
-    film_id  BIGINT UNSIGNED NOT NULL,
-    actor_id BIGINT UNSIGNED NOT NULL,
-    PRIMARY KEY (film_id, actor_id),
-    FOREIGN KEY (film_id) REFERENCES films (id),
-    FOREIGN KEY (actor_id) REFERENCES actors (id)
-) ENGINE=INNODB;
