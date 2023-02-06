@@ -148,6 +148,7 @@ Bad response:
 ```
 ------------
 ### Display all entries
+
 Method: **GET** \
 Response code: **200 OK** \
 **Films** URL: http://localhost:8080/films or http://localhost:8080/?controller=films \
@@ -184,12 +185,15 @@ Success response:
 ]
 ```
 
-### Edit an entry
+### Edit an entry 
+
+---
 
 Method: **PUT** \
 Header: **Content-Type: application/json** \
 Response codes: **202 Accepted** | **400 Bad request** | **404 Not Found** \
 GET params: **{$id} int-required**
+
 ---
 **Films** URL: http://localhost:8080/films/{$id} or http://localhost:8080/?controller=films&id={$id} \
 Films POST Params:
