@@ -1,6 +1,7 @@
 <?php
 
 namespace Api\Models;
+
 use Api\Models\Entities\FilmEntity;
 
 class FilmModel extends Model
@@ -22,13 +23,20 @@ class FilmModel extends Model
     /**
      * @throws ModelException
      * */
-    public function list(): array {
+    public function list(): array
+    {
         try {
-            $sql = "SELECT films.*, genres.name AS genre FROM films JOIN genres ON films.genre = genres.id";
+            $builder = new SqlBuilder();
+            $sql = $builder->select("films.*, genres.name")
+                ->as("genre")
+                ->from($this->table)
+                ->join("genres")
+                ->on("films.genre = genres.id")
+                ->build();
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
+        } catch (\PDOException|SqlBuilderException $e) {
             throw new ModelException($e->getMessage());
         }
     }
@@ -45,12 +53,20 @@ class FilmModel extends Model
             if (!$record) {
                 throw new RecordNotFoundException("The record has not been found.");
             }
-            $sql = "SELECT f.*, g.name as genre FROM films f LEFT JOIN genres g ON f.genre = g.id WHERE f.id = :id";
+
+            $builder = new SqlBuilder();
+            $sql = $builder->select("f.*, g.name")
+                ->as("genre")
+                ->from("films f")
+                ->left_join("genres g")
+                ->on("f.genre = g.id")
+                ->where("f.id = :id")
+                ->build();
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetch(\PDO::FETCH_ASSOC);
-        } catch (\PDOException|\TypeError $e) {
+        } catch (\PDOException|\TypeError|SqlBuilderException $e) {
             throw new ModelException($e->getMessage());
         }
     }
@@ -69,7 +85,7 @@ class FilmModel extends Model
 
             return parent::update($id, $request);
 
-        } catch (ModelException|RecordNotFoundException $e) {
+        } catch (ModelException|RecordNotFoundException|SqlBuilderException $e) {
             throw new ModelException($e->getMessage());
         } catch (\PDOException|\TypeError $e) {
             throw new ModelException("Wrong parameters given on update. Check your request.");
@@ -90,15 +106,16 @@ class FilmModel extends Model
 
             return parent::create($request);
 
-        } catch (ModelException $e) {
+        } catch (ModelException|SqlBuilderException $e) {
             throw new ModelException($e->getMessage());
         } catch (\PDOException|\TypeError $e) {
-            throw new ModelException("Wrong parameters given check your request.".$e->getMessage());
+            throw new ModelException("Wrong parameters given check your request." . $e->getMessage());
         }
     }
 
     /**
      * @throws ModelException
+     * @throws SqlBuilderException
      */
     private function create_or_get_genre($name): int
     {

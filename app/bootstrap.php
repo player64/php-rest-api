@@ -21,7 +21,8 @@ if(!file_exists(__DIR__.'/vendor/autoload.php')) {
         'Models/ActorModel.php',
         'Models/FilmModel.php',
         'Models/GenreModel.php',
-        'Router.php'
+        'Router.php',
+        'Models/SqlBuilder'
     ];
     $path =  __DIR__.'/Api/';
     foreach ($files_to_include as $file) {
