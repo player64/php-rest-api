@@ -185,6 +185,7 @@ Success response:
 ```
 
 ### Edit an entry
+
 Method: **PUT** \
 Header: **Content-Type: application/json** \
 Response codes: **202 Accepted** | **400 Bad request** | **404 Not Found** \
